@@ -1,0 +1,17 @@
+dictCelulares = {"dispositivo": ["a", "b", "c", "d", "e"],  "valor":[638, 622, 784, 681, 790]}
+
+def mediaPrecoCelular(dictCelulares):
+    qntd = 0
+    precocelulares = 0
+    for chave, valor in dictCelulares.items():
+        if chave == "valor":
+            max_valor = max(valor)
+            min_valor = min(valor)
+            for item in valor:
+                qntd += 1
+                precocelulares += item
+                mediacalculada = precocelulares/qntd
+    listagerada = [mediacalculada, min_valor,max_valor]
+    return print(listagerada)
+
+mediaPrecoCelular(dictCelulares)
