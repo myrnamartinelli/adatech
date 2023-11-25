@@ -63,26 +63,38 @@ def get_greater_than(media,tipo_cotacao,clean_file):
     greater_than = list((filter(lambda elem: elem[tipo_cotacao]>media, clean_file)))
     return greater_than
 
+"""
+As próximas 2 funções utiliza o map para gerar listas contendo os valores das diferentes chaves do dicionário. 
+Seus retornos são imprescindiveis para o funcionamento da função get_min_max.
+"""
+
 def get_dias(clean_file):
     dias_list = list(map(lambda x:x['dataHoraCotacao'], clean_file))
     return dias_list
+
+def get_cotacao_list(clean_file,tipo_cotacao):
+    return list(map(lambda x:x[tipo_cotacao],clean_file))
     
-def get_min_max(tipo_cotacao):
+    
+def get_min_max(nome,tipo_cotacao,ismin = True):
 
     cotacao_min = tipo_cotacao[0]
-    index_min = 0
     cotacao_max = tipo_cotacao[0]
-    index_max = 0
 
     for i in range(1,len(tipo_cotacao)):
     
-        if tipo_cotacao[i] > cotacao_max:
-            cotacao_max = tipo_cotacao[i]
-            index_max = i
-        elif tipo_cotacao[i] < cotacao_min:
+        if tipo_cotacao[i] < cotacao_min:
             cotacao_min = tipo_cotacao[i]
-            index_min = i
-    return tuple((index_max,cotacao_max),(index_min, cotacao_min))
+
+        elif tipo_cotacao[i] > cotacao_max:
+            cotacao_max = tipo_cotacao[i]
+
+        min=(nome,cotacao_min)
+        max = (nome,cotacao_max)
+    if ismin:
+        return min
+    else:
+        return max
         
 
 def get_categorias():
@@ -103,7 +115,13 @@ def main():
     greater_cotacaoCompra = get_greater_than(media_cotacaoCompra,'cotacaoCompra',clean_file)
     greater_cotacaoVenda = get_greater_than(media_cotacaoVenda,'cotacaoVenda',clean_file)
     dias_list = get_dias(clean_file)
-    
+    cotacaoCompra_list = get_cotacao_list(clean_file,'cotacaoCompra')
+    cotacaoVenda_list = get_cotacao_list(clean_file,'cotacaoVenda')
+    tupla_min_max_compra = get_min_max("cotacaoCompra",cotacaoCompra_list, ismin=True)
+    tupla_min_max_venda = get_min_max("cotacaoVenda",cotacaoCompra_list)
+    print(tupla_min_max_compra)
+    print(tupla_min_max_venda)
+
    
 
     
@@ -122,8 +140,6 @@ main()
 #Permitir que os dados possam ser adicionados, listados, lidos individualmente, atualizados e deletados (manter JSON atualizado) (250XP);
 
 #Garantir que todas as operações tenham validações (try-except, raise) (100XP);
-
-#Criar uma função para obter uma lista de tuplas, com o máximo (ou o mínimo) valor de algum atributo numérico, com o primeira posição contendo o nome do elemento e a segunda o valor máximo (o motivo de ser lista é porque pode ter mais de um elemento com o valor máximo). Exemplo de saída (alunos e suas notas)
 
 #Esta função deve ter um parâmetro opcional (pode ser de qualquer tipo), que indicará qual das estatísticas você deseja obter (mínimo ou máximo) (150XP);
 
