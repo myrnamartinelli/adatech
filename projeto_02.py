@@ -97,7 +97,23 @@ def get_min_max(nome,tipo_cotacao,ismin = True):
         return max
         
 
-def get_categorias():
+def get_categorias(greater_cotacaoCompra,greater_cotacaoVenda):
+
+    #transforma o dicionário em conjunto
+    set_cotacaoCompra = {frozenset(d.items()) for d in greater_cotacaoCompra}
+    set_cotacaoVenda = {frozenset(d.items()) for d in greater_cotacaoVenda}
+    #acha a intersecção entre os conjuntos
+    intersection = set_cotacaoCompra.intersection(set_cotacaoVenda)
+
+    #transforma a intersecção para uma lisra de dicionários
+    above_media = [dict(s) for s in intersection]
+
+    return above_media
+
+    
+
+            
+
     pass
 
 
@@ -119,8 +135,11 @@ def main():
     cotacaoVenda_list = get_cotacao_list(clean_file,'cotacaoVenda')
     tupla_min_max_compra = get_min_max("cotacaoCompra",cotacaoCompra_list, ismin=True)
     tupla_min_max_venda = get_min_max("cotacaoVenda",cotacaoCompra_list)
-    print(tupla_min_max_compra)
-    print(tupla_min_max_venda)
+    above_media = get_categorias(greater_cotacaoCompra,greater_cotacaoVenda)
+    
+
+    
+   
 
    
 
@@ -141,10 +160,6 @@ main()
 
 #Garantir que todas as operações tenham validações (try-except, raise) (100XP);
 
-#Esta função deve ter um parâmetro opcional (pode ser de qualquer tipo), que indicará qual das estatísticas você deseja obter (mínimo ou máximo) (150XP);
-
-
 #Obter pelo menos três dados estatístico simples, entre média, mediana, moda e desvio padrão, a partir de algum agrupamento de dados (exemplo, a média de idade do grupo de professores que dão aula de exatas) (utilizar list comprehension) (150XP);
-
 
 #Salvar dados estatísticos em um CSV (100XP).
