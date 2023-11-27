@@ -2,6 +2,7 @@ import requests
 import json
 import functools
 from functools import reduce
+import csv
 
 FILE_PATH = "data/bacen.json"
 URL = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?@dataInicial='01-01-2023'&@dataFinalCotacao='11-20-2023'&$top=1000&$format=json"
@@ -66,7 +67,7 @@ As próximas 2 funções utiliza o map para gerar listas contendo os valores das
 Seus retornos são imprescindiveis para o funcionamento da função get_min_max.
 """
 
-def get_dias(clean_file):
+def get_lista_de_datas(clean_file):
     dias_list = list(map(lambda x:x['dataHoraCotacao'], clean_file))
     return dias_list
 
@@ -96,6 +97,9 @@ def get_min_max(nome,tipo_cotacao,ismin = True):
         
 
 def get_categorias(greater_cotacaoCompra,greater_cotacaoVenda):
+    """
+    Faz uma lista de dicionarios somente com valores que possuem cotacao de compra E venda acima da média
+    """
 
     #transforma o dicionário em conjunto
     set_cotacaoCompra = {frozenset(d.items()) for d in greater_cotacaoCompra}
@@ -108,11 +112,30 @@ def get_categorias(greater_cotacaoCompra,greater_cotacaoVenda):
 
     return above_media
 
-    
+#def media_categoria(above_media):
 
-            
 
-    pass
+def salvar_csv(data, file_name): 
+    field_names = data[0].keys()
+
+    try:
+        with open(file_name+'.csv', mode='w', newline='') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=field_names)
+            writer.writeheader()
+            writer.writerows(data)
+
+        print(f"Dados salvos em {file_name}.csv")
+    except Exception as e:
+        print(f"Erro ao salvar CSV: {e}")
+
+def calcula_desvio_padrao(lista_cotacao):
+    n = len(lista_cotacao)
+    media = sum(lista_cotacao) / n
+    dif_quadrado = [(x - media) ** 2 for x in lista_cotacao]
+    varianca = sum(dif_quadrado) / n
+    desvio_padrao = varianca ** 0.5
+    return [{'desvio_padrao':desvio_padrao}]
+
 
 def estatisticas():
     json_file_data = read_file()
@@ -122,13 +145,29 @@ def estatisticas():
     media_cotacaoCompra = get_media_cotacao(acumulado_cotacaoCompra,len(clean_file))
     media_cotacaoVenda = get_media_cotacao(acumulado_cotacaoVenda,len(clean_file))
     greater_cotacaoCompra = get_greater_than(media_cotacaoCompra,'cotacaoCompra',clean_file)
+    salvar_csv(greater_cotacaoCompra,'cotacoes_compra_acima_da_media')
     greater_cotacaoVenda = get_greater_than(media_cotacaoVenda,'cotacaoVenda',clean_file)
-    dias_list = get_dias(clean_file)
+    salvar_csv(greater_cotacaoCompra,'cotacoes_venda_acima_da_media')
+
+    dias_list = get_lista_de_datas(clean_file)
+
+
     cotacaoCompra_list = get_cotacao_list(clean_file,'cotacaoCompra')
     cotacaoVenda_list = get_cotacao_list(clean_file,'cotacaoVenda')
     tupla_min_max_compra = get_min_max("cotacaoCompra",cotacaoCompra_list, ismin=True)
     tupla_min_max_venda = get_min_max("cotacaoVenda",cotacaoCompra_list)
+
+
+
     above_media = get_categorias(greater_cotacaoCompra,greater_cotacaoVenda)
+    salvar_csv(above_media,'cotacoes_compra_E_venda_acima_da_media')
+    cotacaoCompra_list_above_media = get_cotacao_list(above_media,'cotacaoCompra')
+    cotacaoVenda_list_above_media = get_cotacao_list(above_media,'cotacaoVenda')
+    desvio_padrao_compra = calcula_desvio_padrao(cotacaoCompra_list_above_media)
+    desvio_padrao_venda = calcula_desvio_padrao(cotacaoVenda_list_above_media)
+    salvar_csv(desvio_padrao_compra,'desvio_padrao_cotacao_compra')
+    salvar_csv(desvio_padrao_venda,'desvio_padrao_cotacao_venda')
+    
 
 
 def main():
@@ -262,14 +301,8 @@ def menu_secundario():
         else:
             print("Opção inválida. Escolha entre 1 e 6.")
 
-    
-
-
 main()
         
 
-#Garantir que todas as operações tenham validações (try-except, raise) (100XP);
 
 #Obter pelo menos três dados estatístico simples, entre média, mediana, moda e desvio padrão, a partir de algum agrupamento de dados (exemplo, a média de idade do grupo de professores que dão aula de exatas) (utilizar list comprehension) (150XP);
-
-#Salvar dados estatísticos em um CSV (100XP).
