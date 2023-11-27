@@ -178,6 +178,18 @@ def remove_item(data, datahora):
     else:
         print(f"Data {datahora} não encontrada.")
 
+def listar(json_file_data):
+    for item in json_file_data["value"]:
+        print(f'{item["dataHoraCotacao"]} - Compra: {item["cotacaoCompra"]} | Venda: {item["cotacaoVenda"]}')
+
+def ler(json_file_data,datahora):
+    index_editar = get_datahora_index(json_file_data["value"], datahora)
+
+    if index_editar is not None:
+        return json_file_data["value"][index_editar]
+    else:
+        print(f"Data {datahora} não encontrada.")
+
 def menu_primario():
     while True:
         print("Escolha o JSON:")
@@ -207,9 +219,12 @@ def menu_secundario():
         print("1. Adicionar")
         print("2. Editar")
         print("3. Remover")
-        print("4. Salvar e voltar")
+        print("4. Ler")
+        print("5. Listar")
+        
+        print("6. Salvar e voltar")
 
-        opcao = input("Escolha uma opção (1-4): ")
+        opcao = input("Escolha uma opção (1-6): ")
 
         if opcao == '1':
             datahora = input("Informe a data (YYYY-MM-DD): ")
@@ -228,20 +243,30 @@ def menu_secundario():
             remove_item(json_file_data, datahora)
 
         elif opcao == '4':
+            datahora = input("Informe a data que deseja ler (YYYY-MM-DD): ")
+            encontrado = ler(json_file_data,datahora)
+            if encontrado:
+                print("Valores:")
+                print("Compra:",encontrado['cotacaoCompra'])
+                print("Venda:",encontrado['cotacaoVenda'])
+
+        elif opcao == '5':
+            
+            listar(json_file_data)
+
+        elif opcao == '6':
             save_json(json_file_data)
             print("Arquivo JSON atualizado.")
             break
 
         else:
-            print("Opção inválida. Escolha entre 1 e 4.")
+            print("Opção inválida. Escolha entre 1 e 6.")
 
     
 
 
 main()
         
-
-#Permitir que os dados possam ser adicionados, listados, lidos individualmente, atualizados e deletados (manter JSON atualizado) (250XP);
 
 #Garantir que todas as operações tenham validações (try-except, raise) (100XP);
 
